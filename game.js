@@ -74,57 +74,56 @@ function draw() {
 }
 
 function mousePressed() {
-  if (!block) {
-    startTime = millis();
-    block = true;
-  }
-  for (let candle of redCandles.concat(greenCandles)) {
-    if (candle.contains(mouseX, mouseY)) {
-      selectedElement = candle;
-      offsetX = candle.x - mouseX;
-      offsetY = candle.y - mouseY;
-      break;
-    }
-  }
-
-  if (key.contains(mouseX, mouseY)) {
-    selectedElement = key;
-    offsetX = key.x - mouseX;
-    offsetY = key.y - mouseY;
-  }
+  handlePress(mouseX, mouseY);
 }
 
 function mouseReleased() {
   selectedElement = null;
 }
 
+function mouseMoved() {
+  handleMove(mouseX, mouseY);
+}
+
 function touchStarted() {
+  handlePress(touchX, touchY);
+  return false; // Prevent default action
+}
+
+function touchMoved() {
+  handleMove(touchX, touchY);
+  return false; // Prevent default action
+}
+
+function touchEnded() {
+  selectedElement = null;
+}
+
+function handlePress(x, y) {
   if (!block) {
     startTime = millis();
     block = true;
   }
   for (let candle of redCandles.concat(greenCandles)) {
-    if (candle.contains(touchX, touchY)) {
+    if (candle.contains(x, y)) {
       selectedElement = candle;
-      offsetX = candle.x - touchX;
-      offsetY = candle.y - touchY;
-      return false; // Prevent default action
+      offsetX = candle.x - x;
+      offsetY = candle.y - y;
+      return;
     }
   }
 
-  if (key.contains(touchX, touchY)) {
+  if (key.contains(x, y)) {
     selectedElement = key;
-    offsetX = key.x - touchX;
-    offsetY = key.y - touchY;
-    return false; // Prevent default action
+    offsetX = key.x - x;
+    offsetY = key.y - y;
   }
-  return false; // Prevent default action
 }
 
-function touchMoved() {
+function handleMove(x, y) {
   if (selectedElement) {
-    let newX = touchX + offsetX;
-    let newY = touchY + offsetY;
+    let newX = x + offsetX;
+    let newY = y + offsetY;
 
     if (selectedElement.color === 'red') {
       newX = selectedElement.x;
@@ -146,11 +145,6 @@ function touchMoved() {
       displayWinMessage();
     }
   }
-  return false; // Prevent default action
-}
-
-function touchEnded() {
-  selectedElement = null;
 }
 
 class Candle {
@@ -207,3 +201,8 @@ function displayWinMessage() {
   textSize(16);
   text(`Time taken: ${(endTime - startTime) / 1000} seconds`, width / 2, height / 2 + 16);
 }
+
+// Prevent page refresh on mobile devices
+document.addEventListener('touchmove', function(event) {
+  event.preventDefault();
+}, { passive: false });
