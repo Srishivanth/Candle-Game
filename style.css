@@ -1,0 +1,15 @@
+body {
+  background-color: #000; /* Black background */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#game-container {
+  width: 330px; /* Set the game container width to match your game's dimensions */
+  height: 330px; /* Set the game container height to match your game's dimensions */
+  border: 1px solid #ccc; /* Add a border around the game container */
+}
