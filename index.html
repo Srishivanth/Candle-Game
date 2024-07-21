@@ -1,89 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Candle Game</title>
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.21.3/full/pyodide.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candle Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game-container" style="width: 330px; height: 330px; border: 1px solid black;"></div>
-  <script>
-    pyodide.runPython(`
-      import asyncio
-      import pygame
-      import sys
-
-      async def main():
-        pygame.init()
-        screen_width = 330
-        screen_height = 330
-        screen = pygame.display.set_mode((screen_width, screen_height))
-        pygame.display.set_caption("Candle Game")
-
-        # Define some colors
-        black = (0, 0, 0)
-        red = (255, 0, 0)
-        green = (0, 255, 0)
-        yellow = (255, 215, 0)
-
-        # Set up the grid
-        grid_size = 55
-        grid_width = screen_width // grid_size
-        grid_height = screen_height // grid_size
-
-        # Set up the candles
-        red_candles = []
-        green_candles = []
-        for i in range(5):
-          x = (i * grid_size) + (grid_size // 2)
-          y = grid_size // 2
-          red_candles.append(pygame.Rect(x, y, grid_size - 4, grid_size - 4))
-          y = screen_height - (grid_size // 2)
-          green_candles.append(pygame.Rect(x, y, grid_size - 4, grid_size - 4))
-
-        # Set up the key
-        key_image = pygame.Surface((grid_size - 4, grid_size - 4))
-        key_image.fill(yellow)
-        key = pygame.Rect(screen_width // 2, screen_height // 2, grid_size - 4, grid_size - 4)
-
-        # Game loop
-        while True:
-          # Handle events
-          for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-              pygame.quit()
-              sys.exit()
-
-          # Clear the screen
-          screen.fill(black)
-
-          # Draw grid
-          for x in range(0, screen_width, grid_size):
-            if x % (grid_size * 3) == 0:
-              pygame.draw.line(screen, yellow, (x, 0), (x, screen_height), 2)
-            else:
-              pygame.draw.line(screen, yellow, (x, 0), (x, screen_height), 1)
-          for y in range(0, screen_height, grid_size):
-            if y % (grid_size * 3) == 0:
-              pygame.draw.line(screen, yellow, (0, y), (screen_width, y), 2)
-            else:
-              pygame.draw.line(screen, yellow, (0, y), (screen_width, y), 1)
-
-          # Draw the candles and key
-          for candle in red_candles:
-            pygame.draw.rect(screen, black, (candle.x - 2, candle.y - 2, candle.width + 4, candle.height + 4), 2)
-            pygame.draw.rect(screen, red, candle)
-          for candle in green_candles:
-            pygame.draw.rect(screen, black, (candle.x - 2, candle.y - 2, candle.width + 4, candle.height + 4), 2)
-            pygame.draw.rect(screen, green, candle)
-          pygame.draw.rect(screen, black, (key.x - 2, key.y - 2, key.width + 4, key.height + 4), 2)
-          screen.blit(key_image, key)
-
-          # Update the display
-          pygame.display.flip()
-          await asyncio.sleep(0)
-
-      asyncio.run(main())
-    `);
-  </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
