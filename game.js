@@ -12,7 +12,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(330, 330);
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent('game-container'); // Attach canvas to div
   redCandles = [
     new Candle(3, 58, 50, 104, 'red'),
     new Candle(58, 3, 50, 159, 'red'),
@@ -74,56 +75,30 @@ function draw() {
 }
 
 function mousePressed() {
-  handlePress(mouseX, mouseY);
-}
-
-function mouseReleased() {
-  selectedElement = null;
-}
-
-function mouseMoved() {
-  handleMove(mouseX, mouseY);
-}
-
-function touchStarted() {
-  handlePress(touchX, touchY);
-  return false; // Prevent default action
-}
-
-function touchMoved() {
-  handleMove(touchX, touchY);
-  return false; // Prevent default action
-}
-
-function touchEnded() {
-  selectedElement = null;
-}
-
-function handlePress(x, y) {
   if (!block) {
     startTime = millis();
     block = true;
   }
   for (let candle of redCandles.concat(greenCandles)) {
-    if (candle.contains(x, y)) {
+    if (candle.contains(mouseX, mouseY)) {
       selectedElement = candle;
-      offsetX = candle.x - x;
-      offsetY = candle.y - y;
-      return;
+      offsetX = candle.x - mouseX;
+      offsetY = candle.y - mouseY;
+      break;
     }
   }
 
-  if (key.contains(x, y)) {
+  if (key.contains(mouseX, mouseY)) {
     selectedElement = key;
-    offsetX = key.x - x;
-    offsetY = key.y - y;
+    offsetX = key.x - mouseX;
+    offsetY = key.y - mouseY;
   }
 }
 
-function handleMove(x, y) {
+function mouseMoved() {
   if (selectedElement) {
-    let newX = x + offsetX;
-    let newY = y + offsetY;
+    let newX = mouseX + offsetX;
+    let newY = mouseY + offsetY;
 
     if (selectedElement.color === 'red') {
       newX = selectedElement.x;
@@ -147,6 +122,65 @@ function handleMove(x, y) {
   }
 }
 
+function mouseReleased() {
+  selectedElement = null;
+}
+
+function touchStarted() {
+  if (!block) {
+    startTime = millis();
+    block = true;
+  }
+  for (let candle of redCandles.concat(greenCandles)) {
+    if (candle.contains(touchX, touchY)) {
+      selectedElement = candle;
+      offsetX = candle.x - touchX;
+      offsetY = candle.y - touchY;
+      return false; // Prevent default action
+    }
+  }
+
+  if (key.contains(touchX, touchY)) {
+    selectedElement = key;
+    offsetX = key.x - touchX;
+    offsetY = key.y - touchY;
+    return false; // Prevent default action
+  }
+  return false; // Prevent default action
+}
+
+function touchMoved() {
+  if (selectedElement) {
+    let newX = touchX + offsetX;
+    let newY = touchY + offsetY;
+
+    if (selectedElement.color === 'red') {
+      newX = selectedElement.x;
+    } else if (selectedElement.color === 'green' || selectedElement.color === 'key') {
+      newY = selectedElement.y;
+    }
+
+    newX = constrain(newX, 0, width - selectedElement.w);
+    newY = constrain(newY, 0, height - selectedElement.h);
+
+    if (!checkCollision(newX, newY, selectedElement.w, selectedElement.h, selectedElement)) {
+      selectedElement.x = newX;
+      selectedElement.y = newY;
+    }
+
+    if (selectedElement.color === 'key' && selectedElement.x + selectedElement.w >= width) {
+      endTime = millis();
+      noLoop();
+      displayWinMessage();
+    }
+  }
+  return false; // Prevent default action
+}
+
+function touchEnded() {
+  selectedElement = null;
+}
+
 class Candle {
   constructor(x, y, w, h, color) {
     this.x = x;
@@ -161,7 +195,7 @@ class Candle {
     if (this.color === 'key') {
       image(keyImage, this.x, this.y, this.w, this.h);
     } else {
-      fill(this.color === 'red' ? color(255, 0, 0) : this.color === 'green' ? color(0, 255, 0) : color(255, 215, 0));
+      fill(this.color === 'red'? color(255, 0, 0) : this.color === 'green'? color(0, 255, 0) : color(255, 215, 0));
       rect(this.x, this.y, this.w, this.h);
     }
   }
@@ -177,6 +211,7 @@ function drawGrid() {
     strokeWeight(x % 165 === 0 ? 2 : 1);
     line(x, 0, x, height);
   }
+
   for (let y = 0; y < height; y += 55) {
     strokeWeight(y % 165 === 0 ? 2 : 1);
     line(0, y, width, y);
@@ -184,7 +219,7 @@ function drawGrid() {
 }
 
 function checkCollision(x, y, w, h, exclude) {
-  for (let candle of redCandles.concat(greenCandles).concat(key)) {
+  for (let candle of redCandles.concat(greenCandles).concat([key])) {
     if (candle !== exclude && x < candle.x + candle.w && x + w > candle.x && y < candle.y + candle.h && y + h > candle.y) {
       return true;
     }
@@ -193,16 +228,10 @@ function checkCollision(x, y, w, h, exclude) {
 }
 
 function displayWinMessage() {
-  background(0);
-  textSize(32);
   fill(0, 255, 0);
-  textAlign(CENTER);
-  text('You Win!', width / 2, height / 2 - 16);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  text('You Win!', width / 2, height / 2 - 20);
   textSize(16);
-  text(`Time taken: ${(endTime - startTime) / 1000} seconds`, width / 2, height / 2 + 16);
+  text('Time taken: ' + ((endTime - startTime) / 1000).toFixed(2) + ' seconds', width / 2, height / 2 + 20);
 }
-
-// Prevent page refresh on mobile devices
-document.addEventListener('touchmove', function(event) {
-  event.preventDefault();
-}, { passive: false });
